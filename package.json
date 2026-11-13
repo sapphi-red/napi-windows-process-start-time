@@ -1,6 +1,6 @@
 {
   "name": "napi-windows-process-start-time",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Tiny native addon for Windows process creation times",
   "keywords": [
     "napi",
