@@ -8,6 +8,12 @@ mod win32;
 use napi::{Env, Info, Value};
 use win32::{FileTime, Handle};
 
+// 584,388 days between the .NET (0001-01-01) and FILETIME (1601-01-01) epochs
+const FILETIME_TO_DOTNET_SECONDS: u64 = 584_388 * 24 * 60 * 60;
+// Matches .NET's FileTimeOffset:
+// https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/DateTime.cs
+const FILETIME_TO_DOTNET_TICKS: u64 = FILETIME_TO_DOTNET_SECONDS * (1_000_000_000 / 100);
+
 #[panic_handler]
 fn panic(_: &core::panic::PanicInfo) -> ! {
     unsafe {
@@ -60,7 +66,7 @@ fn process_ticks(pid: u32) -> Option<u64> {
     }
     Some(
         ((u64::from(creation.dwHighDateTime) << 32) | u64::from(creation.dwLowDateTime))
-            + 504_911_232_000_000_000,
+            + FILETIME_TO_DOTNET_TICKS,
     )
 }
 
