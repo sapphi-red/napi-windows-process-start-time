@@ -44,7 +44,8 @@
   },
   "devDependencies": {
     "oxfmt": "^0.76.0",
-    "oxlint": "^1.91.0"
+    "oxlint": "^1.91.0",
+    "pkg-pr-new": "0.0.93"
   },
   "engines": {
     "node": ">=20"

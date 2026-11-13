@@ -172,6 +172,9 @@ importers:
       oxlint:
         specifier: ^1.91.0
         version: 1.93.0
+      pkg-pr-new:
+        specifier: 0.0.93
+        version: 0.0.93
 
 packages:
 
@@ -448,6 +451,10 @@ packages:
       vite-plus:
         optional: true
 
+  pkg-pr-new@0.0.93:
+    resolution: {integrity: sha512-JH3HEO+m8sNFpalNAeGrNKjdwxNcXT3yuEuGMU/65dvLojPo+Ofnmc8la2v2ceisjXTOKQw/738Pj4KNFY7F+w==}
+    hasBin: true
+
   tinypool@2.2.0:
     resolution: {integrity: sha512-jBrmx4lYmaC9k/mgPbylxs7kBUxHtD8256up+HjLaDFfXScKJQyil+SWXSvhAtT7XHo+yTVlpB81PGmHP8oLSQ==}
     engines: {node: ^20.0.0 || >=22.0.0}
@@ -613,5 +620,7 @@ snapshots:
       '@oxlint/binding-win32-arm64-msvc': 1.93.0
       '@oxlint/binding-win32-ia32-msvc': 1.93.0
       '@oxlint/binding-win32-x64-msvc': 1.93.0
+
+  pkg-pr-new@0.0.93: {}
 
   tinypool@2.2.0: {}

@@ -85,7 +85,14 @@ pnpm pack --ignore-scripts
 ```
 
 CI builds and tests x64 and ARM64 across Node.js 20, 22, 24, and 26, then produces
-an npm tarball containing both binaries. It does not publish the package.
+an npm tarball containing both binaries. After packaging succeeds, CI uploads that
+tarball to [pkg.pr.new](https://github.com/stackblitz-labs/pkg.pr.new) for preview
+installs on pushes, pull requests, and manual workflow runs. Preview install links
+appear in the workflow logs and pull request comments.
+
+Install the [pkg.pr.new GitHub App](https://github.com/apps/pkg-pr-new) on the
+repository before running the workflow. Previews use the packaged tarball as-is
+and do not publish to npm.
 
 ## Implementation
 
