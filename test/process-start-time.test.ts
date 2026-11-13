@@ -1,15 +1,13 @@
-import assert from 'node:assert/strict'
 import { execFileSync, spawn } from 'node:child_process'
 import { once } from 'node:events'
 import { Worker } from 'node:worker_threads'
-import { test } from 'vitest'
+import { expect, test } from 'vitest'
 import { getProcessStartTime } from 'napi-windows-process-start-time'
 
 test('the current process has a stable, precise timestamp', () => {
   const start = getProcessStartTime(process.pid)
-  assert.ok(start !== null)
-  assert.match(start, /^win32:\d+$/)
-  assert.equal(getProcessStartTime(process.pid), start)
+  expect(start).toMatch(/^win32:\d+$/)
+  expect(getProcessStartTime(process.pid)).toBe(start)
 })
 
 test('timestamps match PowerShell DateTime ticks', { timeout: 15_000 }, () => {
@@ -24,12 +22,12 @@ test('timestamps match PowerShell DateTime ticks', { timeout: 15_000 }, () => {
     ],
     { encoding: 'utf8', windowsHide: true, timeout: 10_000 },
   ).trim()
-  assert.equal(getProcessStartTime(process.pid), `win32:${ticks}`)
+  expect(getProcessStartTime(process.pid)).toBe(`win32:${ticks}`)
 })
 
 test('invalid arguments throw TypeError', () => {
   // @ts-expect-error Exercise runtime validation of a missing PID.
-  assert.throws(() => getProcessStartTime(), TypeError)
+  expect(() => getProcessStartTime()).toThrow(TypeError)
   for (const input of [
     undefined,
     null,
@@ -52,14 +50,14 @@ test('invalid arguments throw TypeError', () => {
     -Infinity,
   ]) {
     // @ts-expect-error Exercise runtime validation of invalid PID types and values.
-    assert.throws(() => getProcessStartTime(input), TypeError)
+    expect(() => getProcessStartTime(input)).toThrow(TypeError)
   }
 })
 
 test('unqueryable and nonexistent processes return null', () => {
-  assert.equal(getProcessStartTime(0), null)
-  assert.equal(getProcessStartTime(-0), null)
-  assert.equal(getProcessStartTime(0xffffffff), null)
+  expect(getProcessStartTime(0)).toBeNull()
+  expect(getProcessStartTime(-0)).toBeNull()
+  expect(getProcessStartTime(0xffffffff)).toBeNull()
 })
 
 test(
@@ -77,14 +75,14 @@ test(
       await exited
     })
     await once(child, 'message')
-    assert.ok(child.pid !== undefined)
-    const start = getProcessStartTime(child.pid)
-    assert.ok(start !== null)
-    assert.match(start, /^win32:\d+$/)
-    assert.equal(getProcessStartTime(child.pid), start)
+    const pid = child.pid
+    if (pid === undefined) throw new Error('Child process did not start')
+    const start = getProcessStartTime(pid)
+    expect(start).toMatch(/^win32:\d+$/)
+    expect(getProcessStartTime(pid)).toBe(start)
     child.kill()
     await exited
-    assert.equal(getProcessStartTime(child.pid), null)
+    expect(getProcessStartTime(pid)).toBeNull()
   },
 )
 
@@ -101,8 +99,8 @@ test(
         })
         const exited = once(worker, 'exit')
         const [value] = await once(worker, 'message')
-        assert.equal(value, expected)
-        assert.deepEqual(await exited, [0])
+        expect(value).toBe(expected)
+        expect(await exited).toEqual([0])
       }),
     )
   },
