@@ -1,0 +1,5 @@
+/target/
+/native/*.node
+/node_modules/
+/*.tgz
+/npm-cache/
