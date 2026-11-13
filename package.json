@@ -39,13 +39,15 @@
     "build": "node scripts/build.mjs",
     "pretest": "npm run build",
     "test": "node --test test/*.test.mjs",
+    "lint": "oxlint",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "check": "npm run format:check && cargo fmt --check && cargo clippy --lib -- -D warnings",
+    "check": "npm run format:check && npm run lint && cargo fmt --check && cargo clippy --lib -- -D warnings",
     "prepack": "npm run build"
   },
   "devDependencies": {
-    "oxfmt": "^0.76.0"
+    "oxfmt": "^0.76.0",
+    "oxlint": "^1.91.0"
   },
   "engines": {
     "node": ">=20"
