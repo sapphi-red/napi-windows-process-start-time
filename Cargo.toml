@@ -84,57 +84,9 @@ module_inception = "allow"
 module_name_repetitions = "allow"
 similar_names = "allow"
 
-trivially_copy_pass_by_ref = "allow"
-struct_field_names = "allow"
-unused_self = "allow"
-wrong_self_convention = "allow"
-
 # Forwarding `Result` is a common pattern, this rule is too pedantic.
 missing_errors_doc = "allow"
-
-# #[must_use] is creating too much noise for this codebase, it does not add much value except nagging
-# the programmer to add a #[must_use] after clippy has been run.
-# Having #[must_use] everywhere also hinders readability.
-must_use_candidate = "allow"
-
-doc_markdown = "allow"
-needless_for_each = "allow"
-new_without_default = "allow"
-# TODO: should review this rule.
-missing_panics_doc = "allow"
-# Plugin hooks return `impl Future`, so impls commonly use `async fn` even with no `.await`.
-# Rewriting every early return as `std::future::ready(...)` is noisy and fights existing style.
-unused_async_trait_impl = "allow"
 
 # --- nursery https://doc.rust-lang.org/clippy/usage.html#clippynursery
 # We should only disable rules globally if they are either false positives, chaotic, or does not make sense.
 nursery = { level = "warn", priority = -1 }
-# `const` functions do not make sense for our project because this is not a `const` library.
-# This rule also confuses newcomers and forces them to add `const` blindlessly without any reason.
-missing_const_for_fn = "allow"
-option_if_let_else = "allow"
-or_fun_call = "allow"
-cognitive_complexity = "allow"
-non_send_fields_in_send_ty = "allow"
-use_self = "allow"
-significant_drop_tightening = "allow"
-branches_sharing_code = "allow"
-fallible_impl_from = "allow"
-useless_let_if_seq = "allow"
-impl_trait_in_params = "allow"
-# FIXME https://github.com/rust-lang/rust-clippy/issues/15429 - False positive with serde skip_serializing
-zero_sized_map_values = "allow"
-# False positive with derive_more debug attribute syntax
-literal_string_with_formatting_args = "allow"
-# Too many changes required across the codebase
-collapsible_if = "allow"
-too_long_first_doc_paragraph = "allow"
-single_match_else = "allow"
-single_option_map = "allow"
-map_unwrap_or = "allow"
-equatable_if_let = "allow"
-string_lit_as_bytes = "allow"
-needless_collect = "allow"
-iter_with_drain = "allow"
-unnecessary_struct_initialization = "allow"
-trivial_regex = "allow"
