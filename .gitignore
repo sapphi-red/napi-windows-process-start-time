@@ -1,4 +1,5 @@
 /target/
+/dist/
 /native/*.node
 /node_modules/
 /.pnpm-store/

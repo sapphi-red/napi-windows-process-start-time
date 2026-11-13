@@ -37,13 +37,17 @@ jobs:
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version: ${{ matrix.node }}
+          node-version: 24
       - name: Set up stable Rust
         run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy --no-self-update
       - name: Select stable Rust
         run: rustup default stable
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test
+      - run: pnpm run build
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ matrix.node }}
+      - run: pnpm exec vitest run
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: matrix.node == 24
         with:
@@ -65,6 +69,8 @@ jobs:
           pattern: native-*
           merge-multiple: true
           path: native
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:js
       - run: pnpm pack --ignore-scripts
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:

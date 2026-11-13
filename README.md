@@ -41,6 +41,7 @@ Other operating systems and architectures are rejected when loading the module.
 
 ## Development
 
+Use Node.js 22.18 or newer for development so Node can run `scripts/build.ts` directly.
 Install stable Rust and Visual Studio C++ Build Tools with the Windows SDK.
 The default build targets the architecture of the Node.js executable:
 
@@ -55,6 +56,11 @@ pnpm run format
 
 The pnpm dependencies are development tools only. Rust's build script runs on the host
 with `std`; the shipped addon itself is entirely `no_std` and links only Win32.
+tsdown compiles the TypeScript wrapper into `dist/` and generates
+the package's type declarations, then its `onSuccess` hook runs `scripts/build.ts`
+with Node to build the native addon. Run `pnpm run lint` or `pnpm run typecheck` for
+Oxlint's type-aware linting and type checking, or `pnpm run build:js` to compile
+without building Rust.
 The addon links with `/NOENTRY` because it needs no DLL entry point or C runtime
 initialization. Node.js initializes the addon through `napi_register_module_v1`.
 
@@ -66,9 +72,10 @@ and conflicts with this addon's custom panic handler.
 To cross-compile ARM64 from a Windows x64 machine, install the Rust target and
 the ARM64 MSVC tools before running:
 
-```sh
+```powershell
 rustup target add aarch64-pc-windows-msvc
-pnpm run build --target aarch64-pc-windows-msvc
+$env:CARGO_BUILD_TARGET = 'aarch64-pc-windows-msvc'
+pnpm run build
 ```
 
 ## Size and packaging
@@ -85,6 +92,8 @@ both supported architectures, build both targets into `native/`, then run:
 ```sh
 pnpm pack --ignore-scripts
 ```
+
+The tarball includes the compiled wrapper and generated type declarations from `dist/`.
 
 CI builds and tests x64 and ARM64 across Node.js 20, 22, 24, and 26, then produces
 an npm tarball containing both binaries. After packaging succeeds, CI uploads that
