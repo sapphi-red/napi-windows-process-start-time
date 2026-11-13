@@ -1,5 +1,4 @@
 use core::ffi::{c_char, c_void};
-use core::ptr;
 
 use crate::win32;
 
@@ -14,8 +13,9 @@ type Callback = unsafe extern "C" fn(Env, Info) -> Value;
 macro_rules! symbol {
     ($(fn $name:ident($($arg:ident: $ty:ty),* $(,)?) -> Status;)+) => {
         $(pub unsafe fn $name($($arg: $ty),*) -> Status {
-            let module = win32::GetModuleHandleW(ptr::null());
-            let Some(address) = win32::GetProcAddress(module, concat!(stringify!($name), "\0").as_ptr()) else {
+            let module = win32::get_module_handle();
+            let name = core::ffi::CStr::from_bytes_with_nul_unchecked(concat!(stringify!($name), "\0").as_bytes());
+            let Some(address) = win32::get_proc_address(&module, name) else {
                 return 9; // napi_generic_failure
             };
             let function = core::mem::transmute::<
