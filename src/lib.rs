@@ -81,12 +81,12 @@ pub extern "C" fn node_api_module_get_api_version_v1() -> i32 {
 /// Node.js must provide a valid environment and exports object for the current
 /// thread. The callback pointers registered here use the Node-API C ABI.
 pub unsafe extern "C" fn napi_register_module_v1(env: Env, exports: Value) -> Value {
-    let name = b"getProcessStartTime\0";
+    let name = c"getProcessStartTime";
     let mut function = ptr::null_mut();
     if napi::napi_create_function(
         env,
-        name.as_ptr().cast(),
-        name.len() - 1,
+        name.as_ptr(),
+        name.to_bytes().len(),
         get_process_start_time,
         ptr::null_mut(),
         &raw mut function,
@@ -94,7 +94,7 @@ pub unsafe extern "C" fn napi_register_module_v1(env: Env, exports: Value) -> Va
     {
         return ptr::null_mut();
     }
-    if napi::napi_set_named_property(env, exports, name.as_ptr().cast(), function) != 0 {
+    if napi::napi_set_named_property(env, exports, name.as_ptr(), function) != 0 {
         return ptr::null_mut();
     }
     exports
