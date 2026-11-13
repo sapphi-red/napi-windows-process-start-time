@@ -2,7 +2,7 @@ import assert from 'node:assert/strict'
 import { execFileSync, spawn } from 'node:child_process'
 import { once } from 'node:events'
 import { Worker } from 'node:worker_threads'
-import test from 'node:test'
+import { test } from 'vitest'
 import { getProcessStartTime } from 'napi-windows-process-start-time'
 
 test('the current process has a stable, precise timestamp', () => {
@@ -52,36 +52,44 @@ test('unqueryable and nonexistent processes return null', () => {
   assert.equal(getProcessStartTime(0xffffffff), null)
 })
 
-test('a child process has a timestamp until it exits', { timeout: 15_000 }, async (t) => {
-  const child = spawn(
-    process.execPath,
-    ['-e', "setInterval(() => {}, 1000); process.send('ready')"],
-    { stdio: ['ignore', 'ignore', 'inherit', 'ipc'], windowsHide: true },
-  )
-  const exited = once(child, 'exit')
-  t.after(async () => {
-    if (child.exitCode === null && child.signalCode === null) child.kill()
+test(
+  'a child process has a timestamp until it exits',
+  { timeout: 15_000 },
+  async ({ onTestFinished }) => {
+    const child = spawn(
+      process.execPath,
+      ['-e', "setInterval(() => {}, 1000); process.send('ready')"],
+      { stdio: ['ignore', 'ignore', 'inherit', 'ipc'], windowsHide: true },
+    )
+    const exited = once(child, 'exit')
+    onTestFinished(async () => {
+      if (child.exitCode === null && child.signalCode === null) child.kill()
+      await exited
+    })
+    await once(child, 'message')
+    const start = getProcessStartTime(child.pid)
+    assert.match(start, /^win32:\d+$/)
+    assert.equal(getProcessStartTime(child.pid), start)
+    child.kill()
     await exited
-  })
-  await once(child, 'message')
-  const start = getProcessStartTime(child.pid)
-  assert.match(start, /^win32:\d+$/)
-  assert.equal(getProcessStartTime(child.pid), start)
-  child.kill()
-  await exited
-  assert.equal(getProcessStartTime(child.pid), null)
-})
+    assert.equal(getProcessStartTime(child.pid), null)
+  },
+)
 
-test('concurrent workers load and call the addon independently', { timeout: 30_000 }, async (t) => {
-  const expected = getProcessStartTime(process.pid)
-  await Promise.all(
-    Array.from({ length: 16 }, async () => {
-      const worker = new Worker(new URL('./fixtures/worker.mjs', import.meta.url))
-      t.after(() => worker.terminate())
-      const exited = once(worker, 'exit')
-      const [value] = await once(worker, 'message')
-      assert.equal(value, expected)
-      assert.deepEqual(await exited, [0])
-    }),
-  )
-})
+test(
+  'concurrent workers load and call the addon independently',
+  { timeout: 30_000 },
+  async ({ onTestFinished }) => {
+    const expected = getProcessStartTime(process.pid)
+    await Promise.all(
+      Array.from({ length: 16 }, async () => {
+        const worker = new Worker(new URL('./fixtures/worker.mjs', import.meta.url))
+        onTestFinished(() => worker.terminate())
+        const exited = once(worker, 'exit')
+        const [value] = await once(worker, 'message')
+        assert.equal(value, expected)
+        assert.deepEqual(await exited, [0])
+      }),
+    )
+  },
+)

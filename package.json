@@ -35,7 +35,7 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "pnpm run build && node --test test/*.test.mjs",
+    "test": "pnpm run build && vitest run",
     "lint": "oxlint",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
@@ -45,7 +45,8 @@
   "devDependencies": {
     "oxfmt": "^0.76.0",
     "oxlint": "^1.91.0",
-    "pkg-pr-new": "0.0.93"
+    "pkg-pr-new": "0.0.93",
+    "vitest": "^4.0.0"
   },
   "engines": {
     "node": ">=20"

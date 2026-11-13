@@ -42,6 +42,7 @@ jobs:
         run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy --no-self-update
       - name: Select stable Rust
         run: rustup default stable
+      - run: pnpm install --frozen-lockfile
       - run: pnpm test
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: matrix.node == 24
