@@ -6,7 +6,6 @@ mod napi;
 mod win32;
 
 use napi::{Env, Info, Value};
-use win32::FileTime;
 
 // 584,388 days between the .NET (0001-01-01) and FILETIME (1601-01-01) epochs
 const FILETIME_TO_DOTNET_SECONDS: u64 = 584_388 * 24 * 60 * 60;
@@ -16,7 +15,10 @@ const FILETIME_TO_DOTNET_TICKS: u64 = FILETIME_TO_DOTNET_SECONDS * (1_000_000_00
 
 #[panic_handler]
 fn panic(_: &core::panic::PanicInfo) -> ! {
-    win32::terminate_process(&win32::get_current_process(), 0xC000_0409);
+    win32::terminate_process(
+        &win32::get_current_process(),
+        win32::STATUS_STACK_BUFFER_OVERRUN,
+    );
     loop {
         core::hint::spin_loop();
     }
@@ -24,16 +26,10 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
 
 fn process_ticks(pid: u32) -> Option<u64> {
     let handle = win32::open_process(pid)?;
-    if win32::wait_for_single_object(&handle, 0) != win32::WAIT_TIMEOUT {
+    if win32::wait_for_single_object(&handle, 0) != win32::WaitResult::Timeout {
         return None;
     }
-    let mut creation = FileTime::default();
-    let mut exit = FileTime::default();
-    let mut kernel = FileTime::default();
-    let mut user = FileTime::default();
-    if !win32::get_process_times(&handle, &mut creation, &mut exit, &mut kernel, &mut user) {
-        return None;
-    }
+    let creation = win32::get_process_times(&handle)?.creation;
     Some(
         ((u64::from(creation.dwHighDateTime) << 32) | u64::from(creation.dwLowDateTime))
             + FILETIME_TO_DOTNET_TICKS,
