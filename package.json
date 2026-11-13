@@ -12,7 +12,6 @@
   ],
   "license": "MIT",
   "files": [
-    "index.cjs",
     "index.mjs",
     "index.d.ts",
     "native/*.node"
@@ -25,13 +24,12 @@
     "arm64"
   ],
   "type": "module",
-  "main": "./index.cjs",
+  "main": "./index.mjs",
   "types": "./index.d.ts",
   "exports": {
     ".": {
       "types": "./index.d.ts",
-      "import": "./index.mjs",
-      "require": "./index.cjs"
+      "import": "./index.mjs"
     },
     "./package.json": "./package.json"
   },

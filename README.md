@@ -12,11 +12,7 @@ const startTime = getProcessStartTime(process.pid)
 // 'win32:639...' or null
 ```
 
-CommonJS is also supported:
-
-```js
-const { getProcessStartTime } = require('napi-windows-process-start-time')
-```
+The package is ESM-only.
 
 ## API
 

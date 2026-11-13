@@ -1,16 +1,9 @@
 import assert from 'node:assert/strict'
 import { execFileSync, spawn } from 'node:child_process'
 import { once } from 'node:events'
-import { createRequire } from 'node:module'
 import { Worker } from 'node:worker_threads'
 import test from 'node:test'
 import { getProcessStartTime } from 'napi-windows-process-start-time'
-
-const require = createRequire(import.meta.url)
-
-test('ESM and CommonJS expose the same function', () => {
-  assert.equal(require('napi-windows-process-start-time').getProcessStartTime, getProcessStartTime)
-})
 
 test('the current process has a stable, precise timestamp', () => {
   const start = getProcessStartTime(process.pid)
@@ -81,18 +74,9 @@ test('a child process has a timestamp until it exits', { timeout: 15_000 }, asyn
 
 test('concurrent workers load and call the addon independently', { timeout: 30_000 }, async (t) => {
   const expected = getProcessStartTime(process.pid)
-  const filename = require.resolve('napi-windows-process-start-time')
   await Promise.all(
     Array.from({ length: 16 }, async () => {
-      const worker = new Worker(
-        `
-      const { parentPort, workerData } = require('node:worker_threads')
-      const { getProcessStartTime } = require(workerData)
-      for (let i = 0; i < 1000; i++) getProcessStartTime(process.pid)
-      parentPort.postMessage(getProcessStartTime(process.pid))
-    `,
-        { eval: true, workerData: filename },
-      )
+      const worker = new Worker(new URL('./fixtures/worker.mjs', import.meta.url))
       t.after(() => worker.terminate())
       const exited = once(worker, 'exit')
       const [value] = await once(worker, 'message')
