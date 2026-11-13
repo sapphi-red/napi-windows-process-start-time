@@ -9,7 +9,15 @@
     "start-time",
     "windows"
   ],
+  "homepage": "https://github.com/sapphi-red/napi-windows-process-start-time#readme",
+  "bugs": {
+    "url": "https://github.com/sapphi-red/napi-windows-process-start-time/issues"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sapphi-red/napi-windows-process-start-time.git"
+  },
   "files": [
     "dist/index.js",
     "dist/index.d.ts",
