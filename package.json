@@ -1,10 +1,9 @@
 {
   "name": "napi-windows-process-start-time",
   "version": "0.1.0",
-  "description": "Tiny no_std native addon for Windows process creation times",
+  "description": "Tiny native addon for Windows process creation times",
   "keywords": [
     "napi",
-    "no-std",
     "node-api",
     "process",
     "start-time",
@@ -24,15 +23,7 @@
     "arm64"
   ],
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./package.json": "./package.json"
-  },
+  "exports": "./dist/index.js",
   "scripts": {
     "build": "tsdown",
     "build:js": "tsdown --on-success \"\"",
