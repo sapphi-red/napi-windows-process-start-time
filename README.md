@@ -40,7 +40,7 @@ From a clean checkout on `main`:
 
 ```sh
 git pull --ff-only
-pnpm version patch # or minor, major, explicit version
+pnpm version patch -m "release: v%s" # or minor, major, explicit version
 git push origin main --follow-tags
 ```
 
