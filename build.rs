@@ -9,5 +9,9 @@ fn main() {
     );
     // No DLL entry point or CRT initialization is needed: this addon uses only core and Win32.
     println!("cargo:rustc-link-arg=/NOENTRY");
+    // Save section headers/alignment padding by merging read-only unwind data into .rdata.
+    // The PE exception directory preserves unwinding, but tools that require a named .pdata
+    // section may fail, and its section attributes can no longer be controlled separately.
+    println!("cargo:rustc-link-arg=/MERGE:.pdata=.rdata");
     println!("cargo:rerun-if-changed=build.rs");
 }
