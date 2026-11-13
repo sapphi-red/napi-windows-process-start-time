@@ -29,7 +29,7 @@ strip = true
 [profile.dev]
 panic = "abort"
 
-# Aligned with https://github.com/rolldown/rolldown/blob/main/Cargo.toml.
+# Based on https://github.com/rolldown/rolldown/blob/main/Cargo.toml.
 [lints.clippy]
 # Guidelines
 # - We should only disable rules globally if they are either false positives, chaotic, or does not make sense.
