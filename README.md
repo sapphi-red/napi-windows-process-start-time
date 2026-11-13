@@ -32,7 +32,7 @@ for that race when using a timestamp to identify a process.
 ## Platform support
 
 Windows x64 and ARM64 with standard Node.js 20 or newer. The addon uses Node-API
-version 1 and resolves its symbols from the host executable. Embedded Node.js
+version 6 and resolves its symbols from the host executable. Embedded Node.js
 hosts that do not export Node-API symbols are outside the supported scope.
 
 The loader chooses a prebuilt binary by architecture. Published packages need
@@ -73,7 +73,8 @@ pnpm run build --target aarch64-pc-windows-msvc
 
 ## Size and packaging
 
-The initial Windows x64 prototype measured 5,120 bytes for the native binary.
+The Windows x64 native binary measured 3,584 bytes after moving PID validation
+and timestamp formatting into JavaScript (initial prototype: 5,120 bytes).
 Exact sizes depend on the compiler, target, and implementation. The release
 profile uses `opt-level = "z"`, LTO, one codegen unit, stripped symbols, and
 `panic = "abort"`.
@@ -99,8 +100,9 @@ and do not publish to npm.
 
 The addon calls `OpenProcess`, `WaitForSingleObject` with a zero timeout,
 `GetProcessTimes`, and `CloseHandle`. Handles close on every return path.
-Timestamp formatting uses a fixed stack buffer; Node copies the result into
-its own JavaScript string. No mutable global state is shared between workers.
+The JavaScript wrapper validates the PID before calling the native binding.
+The binding returns ticks as a BigInt to preserve all 64 bits; the wrapper formats
+the public `win32:<ticks>` string. No mutable global state is shared between workers.
 
 ## License
 

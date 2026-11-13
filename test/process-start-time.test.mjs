@@ -37,11 +37,17 @@ test('invalid arguments throw TypeError', () => {
     true,
     1n,
     Symbol(),
+    new Number(1),
     -1,
+    -0.5,
+    Number.MIN_VALUE,
     1.5,
+    2 ** 32 - 0.5,
     2 ** 32,
+    Number.MAX_SAFE_INTEGER,
     NaN,
     Infinity,
+    -Infinity,
   ]) {
     assert.throws(() => getProcessStartTime(input), TypeError)
   }
@@ -49,6 +55,7 @@ test('invalid arguments throw TypeError', () => {
 
 test('unqueryable and nonexistent processes return null', () => {
   assert.equal(getProcessStartTime(0), null)
+  assert.equal(getProcessStartTime(-0), null)
   assert.equal(getProcessStartTime(0xffffffff), null)
 })
 

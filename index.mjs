@@ -18,4 +18,11 @@ try {
   )
 }
 
-export const getProcessStartTime = binding.getProcessStartTime
+export function getProcessStartTime(pid) {
+  if (!Number.isInteger(pid) || pid < 0 || pid > 0xffffffff) {
+    throw new TypeError('pid must be a uint32')
+  }
+
+  const ticks = binding.getProcessStartTime(pid)
+  return ticks === null ? null : `win32:${ticks}`
+}

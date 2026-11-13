@@ -94,12 +94,6 @@ fn process_ticks(pid: u32) -> Option<u64> {
     Some(((u64::from(creation.high) << 32) | u64::from(creation.low)) + 504_911_232_000_000_000)
 }
 
-#[expect(
-    clippy::cast_possible_truncation,
-    clippy::cast_sign_loss,
-    clippy::float_cmp,
-    reason = "PID validation checks the uint32 range and exact integer round trip before use"
-)]
 unsafe extern "C" fn get_process_start_time(env: Env, info: Info) -> Value {
     let module = GetModuleHandleW(ptr::null());
     let get_info = symbol!(
@@ -116,8 +110,8 @@ unsafe extern "C" fn get_process_start_time(env: Env, info: Info) -> Value {
     );
     let get_number = symbol!(
         module,
-        "napi_get_value_double",
-        unsafe extern "C" fn(Env, Value, *mut f64) -> Status
+        "napi_get_value_uint32",
+        unsafe extern "C" fn(Env, Value, *mut u32) -> Status
     );
     let throw_type_error = symbol!(
         module,
@@ -137,44 +131,20 @@ unsafe extern "C" fn get_process_start_time(env: Env, info: Info) -> Value {
     {
         return ptr::null_mut();
     }
-    let mut pid = 0.0;
-    if argc == 0
-        || get_number(env, arg, &raw mut pid) != 0
-        || !pid.is_finite()
-        || pid < 0.0
-        || pid > f64::from(u32::MAX)
-        || pid != f64::from(pid as u32)
-    {
+    // The JavaScript wrapper validates the PID's integer value and uint32 range.
+    let mut pid = 0;
+    if argc == 0 || get_number(env, arg, &raw mut pid) != 0 {
         throw_type_error(env, ptr::null(), c"pid must be a uint32".as_ptr());
         return ptr::null_mut();
     }
     let mut result = ptr::null_mut();
-    if let Some(mut ticks) = process_ticks(pid as u32) {
-        // Six prefix bytes and at most 20 decimal digits for a u64.
-        let mut buffer = [0u8; 26];
-        let mut cursor = buffer.len();
-        loop {
-            cursor -= 1;
-            buffer[cursor] = b'0' + (ticks % 10) as u8;
-            ticks /= 10;
-            if ticks == 0 {
-                break;
-            }
-        }
-        cursor -= 6;
-        buffer[cursor..cursor + 6].copy_from_slice(b"win32:");
-        let create_string = symbol!(
+    if let Some(ticks) = process_ticks(pid) {
+        let create_bigint = symbol!(
             module,
-            "napi_create_string_utf8",
-            unsafe extern "C" fn(Env, *const c_char, usize, *mut Value) -> Status
+            "napi_create_bigint_uint64",
+            unsafe extern "C" fn(Env, u64, *mut Value) -> Status
         );
-        if create_string(
-            env,
-            buffer.as_ptr().add(cursor).cast(),
-            buffer.len() - cursor,
-            &raw mut result,
-        ) != 0
-        {
+        if create_bigint(env, ticks, &raw mut result) != 0 {
             return ptr::null_mut();
         }
     } else {
@@ -192,7 +162,7 @@ unsafe extern "C" fn get_process_start_time(env: Env, info: Info) -> Value {
 
 #[no_mangle]
 pub extern "C" fn node_api_module_get_api_version_v1() -> i32 {
-    1
+    6
 }
 
 #[no_mangle]
