@@ -39,42 +39,56 @@ fn process_ticks(pid: u32) -> Option<u64> {
 unsafe extern "C" fn get_process_start_time(env: Env, info: Info) -> Value {
     let mut argc = 1;
     let mut arg = ptr::null_mut();
-    if napi::napi_get_cb_info(
-        env,
-        info,
-        &raw mut argc,
-        &raw mut arg,
-        ptr::null_mut(),
-        ptr::null_mut(),
-    ) != 0
+    // SAFETY: Node.js supplies this callback's environment and info; outputs are writable locals.
+    if unsafe {
+        napi::napi_get_cb_info(
+            env,
+            info,
+            &raw mut argc,
+            &raw mut arg,
+            ptr::null_mut(),
+            ptr::null_mut(),
+        )
+    } != 0
     {
         return ptr::null_mut();
     }
     // The JavaScript wrapper validates the PID's integer value and uint32 range.
     let mut pid = 0;
-    if argc == 0 || napi::napi_get_value_uint32(env, arg, &raw mut pid) != 0 {
-        napi::napi_throw_type_error(env, ptr::null(), c"pid must be a uint32".as_ptr());
+    // SAFETY: A supplied argument belongs to env, and pid is a writable local.
+    if argc == 0 || unsafe { napi::napi_get_value_uint32(env, arg, &raw mut pid) } != 0 {
+        // SAFETY: env is valid, the optional code is null, and the message is NUL-terminated.
+        unsafe {
+            napi::napi_throw_type_error(env, ptr::null(), c"pid must be a uint32".as_ptr());
+        }
         return ptr::null_mut();
     }
     let mut result = ptr::null_mut();
     if let Some(ticks) = process_ticks(pid) {
-        if napi::napi_create_bigint_uint64(env, ticks, &raw mut result) != 0 {
+        // SAFETY: env is valid and result is a writable local.
+        if unsafe { napi::napi_create_bigint_uint64(env, ticks, &raw mut result) } != 0 {
             return ptr::null_mut();
         }
-    } else if napi::napi_get_null(env, &raw mut result) != 0 {
+    } else if unsafe {
+        // SAFETY: env is valid and result is a writable local.
+        napi::napi_get_null(env, &raw mut result)
+    } != 0
+    {
         return ptr::null_mut();
     }
     result
 }
 
-#[no_mangle]
+// This is the addon's sole definition of Node.js's version entry point, with its C ABI.
+#[unsafe(no_mangle)]
 pub extern "C" fn node_api_module_get_api_version_v1() -> i32 {
     // Node-API v6 introduced napi_create_bigint_uint64, which preserves all 64 timestamp bits.
     // https://nodejs.org/api/n-api.html#napi_create_bigint_uint64
     6
 }
 
-#[no_mangle]
+// This is the addon's sole definition of Node.js's registration entry point, with its C ABI.
+#[unsafe(no_mangle)]
 /// Initializes an addon environment when Node.js loads this DLL.
 ///
 /// # Safety
@@ -83,18 +97,22 @@ pub extern "C" fn node_api_module_get_api_version_v1() -> i32 {
 pub unsafe extern "C" fn napi_register_module_v1(env: Env, exports: Value) -> Value {
     let name = c"getProcessStartTime";
     let mut function = ptr::null_mut();
-    if napi::napi_create_function(
-        env,
-        name.as_ptr(),
-        name.to_bytes().len(),
-        get_process_start_time,
-        ptr::null_mut(),
-        &raw mut function,
-    ) != 0
+    // SAFETY: The caller supplies env; name, callback, and the output pointer are valid.
+    if unsafe {
+        napi::napi_create_function(
+            env,
+            name.as_ptr(),
+            name.to_bytes().len(),
+            get_process_start_time,
+            ptr::null_mut(),
+            &raw mut function,
+        )
+    } != 0
     {
         return ptr::null_mut();
     }
-    if napi::napi_set_named_property(env, exports, name.as_ptr(), function) != 0 {
+    // SAFETY: exports and function belong to env, and name is NUL-terminated.
+    if unsafe { napi::napi_set_named_property(env, exports, name.as_ptr(), function) } != 0 {
         return ptr::null_mut();
     }
     exports

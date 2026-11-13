@@ -14,15 +14,22 @@ macro_rules! symbol {
     ($(fn $name:ident($($arg:ident: $ty:ty),* $(,)?) -> Status;)+) => {
         $(pub unsafe fn $name($($arg: $ty),*) -> Status {
             let module = win32::get_module_handle();
-            let name = core::ffi::CStr::from_bytes_with_nul_unchecked(concat!(stringify!($name), "\0").as_bytes());
+            // SAFETY: An identifier contains no NUL bytes, and concat! appends the terminator.
+            let name = unsafe {
+                core::ffi::CStr::from_bytes_with_nul_unchecked(concat!(stringify!($name), "\0").as_bytes())
+            };
             let Some(address) = win32::get_proc_address(&module, name) else {
                 return 9; // napi_generic_failure
             };
-            let function = core::mem::transmute::<
-                unsafe extern "system" fn() -> isize,
-                unsafe extern "C" fn($($ty),*) -> Status,
-            >(address);
-            function($($arg),*)
+            // SAFETY: Each declaration matches the named Node-API export's C ABI and signature.
+            let function = unsafe {
+                core::mem::transmute::<
+                    unsafe extern "system" fn() -> isize,
+                    unsafe extern "C" fn($($ty),*) -> Status,
+                >(address)
+            };
+            // SAFETY: The caller must uphold the declared Node-API function's requirements.
+            unsafe { function($($arg),*) }
         })+
     };
 }
