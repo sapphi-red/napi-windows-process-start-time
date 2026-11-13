@@ -1,8 +1,8 @@
 # napi-windows-process-start-time
 
 A tiny Windows Node-API addon that reads a running process's creation time.
-Uses Rust `#![no_std]`, handwritten Node-API bindings, and Win32 directly.
-No runtime npm dependencies, Rust crate dependencies, Rust allocator, FFI
+Uses Rust `#![no_std]`, handwritten Node-API bindings, and raw Win32 bindings from `windows-sys`.
+No runtime npm dependencies, Rust allocator, FFI
 framework, PowerShell, or subprocesses.
 
 ```js
