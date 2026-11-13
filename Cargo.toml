@@ -21,3 +21,113 @@ strip = true
 
 [profile.dev]
 panic = "abort"
+
+# Aligned with https://github.com/rolldown/rolldown/blob/main/Cargo.toml.
+[lints.clippy]
+# Guidelines
+# - We should only disable rules globally if they are either false positives, chaotic, or does not make sense.
+# - Group are enabled with priority -1, so we could easily override some specific rules.
+#   - https://doc.rust-lang.org/stable/cargo/reference/manifest.html#the-lints-section
+
+# --- restriction https://doc.rust-lang.org/clippy/usage.html#clippyrestriction
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"
+print_stdout = "deny" # Must be opt-in
+print_stderr = "deny" # Must be opt-in
+allow_attributes = "deny"
+
+# I like the explicitness of this rule as it removes confusion around `clone`.
+# This increases readability, avoids `clone` mindlessly and heap allocating on accident.
+clone_on_ref_ptr = "deny"
+empty_drop = "deny"
+exit = "deny"
+filetype_is_file = "deny"
+get_unwrap = "deny"
+rc_buffer = "deny"
+rc_mutex = "deny"
+rest_pat_in_fully_bound_structs = "deny"
+unnecessary_safety_comment = "deny"
+float_cmp_const = "deny"
+lossy_float_literal = "deny"
+fn_to_numeric_cast_any = "deny"
+mixed_read_write_in_expression = "deny"
+precedence_bits = "deny"
+suspicious_xor_used_as_pow = "deny"
+assertions_on_result_states = "deny"
+unused_result_ok = "deny"
+as_underscore = "deny"
+deref_by_slicing = "deny"
+empty_enum_variants_with_brackets = "deny"
+pathbuf_init_then_push = "deny"
+pub_without_shorthand = "deny"
+self_named_module_files = "deny"
+string_lit_chars_any = "deny"
+unnecessary_safety_doc = "deny"
+unnecessary_self_imports = "deny"
+large_include_file = "deny"
+
+# --- pedantic #https://doc.rust-lang.org/clippy/usage.html#clippypedantic
+# To write the best rust code, pedantic group is enabled by default.
+pedantic = { level = "deny", priority = -1 }
+case_sensitive_file_extension_comparisons = "allow"
+
+# Wizards, naming is too hard.
+module_inception = "allow"
+module_name_repetitions = "allow"
+similar_names = "allow"
+
+trivially_copy_pass_by_ref = "allow"
+struct_field_names = "allow"
+unused_self = "allow"
+wrong_self_convention = "allow"
+
+# Forwarding `Result` is a common pattern, this rule is too pedantic.
+missing_errors_doc = "allow"
+
+# #[must_use] is creating too much noise for this codebase, it does not add much value except nagging
+# the programmer to add a #[must_use] after clippy has been run.
+# Having #[must_use] everywhere also hinders readability.
+must_use_candidate = "allow"
+
+doc_markdown = "allow"
+needless_for_each = "allow"
+new_without_default = "allow"
+# TODO: should review this rule.
+missing_panics_doc = "allow"
+# Plugin hooks return `impl Future`, so impls commonly use `async fn` even with no `.await`.
+# Rewriting every early return as `std::future::ready(...)` is noisy and fights existing style.
+unused_async_trait_impl = "allow"
+
+# --- nursery https://doc.rust-lang.org/clippy/usage.html#clippynursery
+# We should only disable rules globally if they are either false positives, chaotic, or does not make sense.
+nursery = { level = "warn", priority = -1 }
+# `const` functions do not make sense for our project because this is not a `const` library.
+# This rule also confuses newcomers and forces them to add `const` blindlessly without any reason.
+missing_const_for_fn = "allow"
+option_if_let_else = "allow"
+or_fun_call = "allow"
+cognitive_complexity = "allow"
+non_send_fields_in_send_ty = "allow"
+use_self = "allow"
+significant_drop_tightening = "allow"
+branches_sharing_code = "allow"
+fallible_impl_from = "allow"
+useless_let_if_seq = "allow"
+impl_trait_in_params = "allow"
+# FIXME https://github.com/rust-lang/rust-clippy/issues/15429 - False positive with serde skip_serializing
+zero_sized_map_values = "allow"
+# False positive with derive_more debug attribute syntax
+literal_string_with_formatting_args = "allow"
+# Too many changes required across the codebase
+collapsible_if = "allow"
+too_long_first_doc_paragraph = "allow"
+single_match_else = "allow"
+single_option_map = "allow"
+map_unwrap_or = "allow"
+equatable_if_let = "allow"
+string_lit_as_bytes = "allow"
+needless_collect = "allow"
+iter_with_drain = "allow"
+unnecessary_struct_initialization = "allow"
+trivial_regex = "allow"

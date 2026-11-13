@@ -38,7 +38,7 @@ extern "system" {
 #[panic_handler]
 fn panic(_: &core::panic::PanicInfo) -> ! {
     unsafe {
-        TerminateProcess(GetCurrentProcess(), 0xC0000409);
+        TerminateProcess(GetCurrentProcess(), 0xC000_0409);
     }
     loop {
         core::hint::spin_loop();
@@ -72,7 +72,7 @@ impl Drop for ProcessHandle {
 }
 
 fn process_ticks(pid: u32) -> Option<u64> {
-    let handle = unsafe { OpenProcess(0x1000 | 0x100000, 0, pid) };
+    let handle = unsafe { OpenProcess(0x1000 | 0x0010_0000, 0, pid) };
     if handle.is_null() {
         return None;
     }
@@ -84,12 +84,27 @@ fn process_ticks(pid: u32) -> Option<u64> {
     let mut exit = FileTime::default();
     let mut kernel = FileTime::default();
     let mut user = FileTime::default();
-    if unsafe { GetProcessTimes(handle.0, &mut creation, &mut exit, &mut kernel, &mut user) } == 0 {
+    if unsafe {
+        GetProcessTimes(
+            handle.0,
+            &raw mut creation,
+            &raw mut exit,
+            &raw mut kernel,
+            &raw mut user,
+        )
+    } == 0
+    {
         return None;
     }
-    Some(((creation.high as u64) << 32 | creation.low as u64) + 504911232000000000)
+    Some(((u64::from(creation.high) << 32) | u64::from(creation.low)) + 504_911_232_000_000_000)
 }
 
+#[expect(
+    clippy::cast_possible_truncation,
+    clippy::cast_sign_loss,
+    clippy::float_cmp,
+    reason = "PID validation checks the uint32 range and exact integer round trip before use"
+)]
 unsafe extern "C" fn get_process_start_time(env: Env, info: Info) -> Value {
     let module = GetModuleHandleW(ptr::null());
     let get_info = symbol!(
@@ -119,8 +134,8 @@ unsafe extern "C" fn get_process_start_time(env: Env, info: Info) -> Value {
     if get_info(
         env,
         info,
-        &mut argc,
-        &mut arg,
+        &raw mut argc,
+        &raw mut arg,
         ptr::null_mut(),
         ptr::null_mut(),
     ) != 0
@@ -129,11 +144,11 @@ unsafe extern "C" fn get_process_start_time(env: Env, info: Info) -> Value {
     }
     let mut pid = 0.0;
     if argc == 0
-        || get_number(env, arg, &mut pid) != 0
+        || get_number(env, arg, &raw mut pid) != 0
         || !pid.is_finite()
         || pid < 0.0
-        || pid > u32::MAX as f64
-        || pid != (pid as u32) as f64
+        || pid > f64::from(u32::MAX)
+        || pid != f64::from(pid as u32)
     {
         throw_type_error(env, ptr::null(), c"pid must be a uint32".as_ptr());
         return ptr::null_mut();
@@ -162,7 +177,7 @@ unsafe extern "C" fn get_process_start_time(env: Env, info: Info) -> Value {
             env,
             buffer.as_ptr().add(cursor).cast(),
             buffer.len() - cursor,
-            &mut result,
+            &raw mut result,
         ) != 0
         {
             return ptr::null_mut();
@@ -173,7 +188,7 @@ unsafe extern "C" fn get_process_start_time(env: Env, info: Info) -> Value {
             "napi_get_null",
             unsafe extern "C" fn(Env, *mut Value) -> Status
         );
-        if get_null(env, &mut result) != 0 {
+        if get_null(env, &raw mut result) != 0 {
             return ptr::null_mut();
         }
     }
@@ -218,7 +233,7 @@ pub unsafe extern "C" fn napi_register_module_v1(env: Env, exports: Value) -> Va
         name.len() - 1,
         get_process_start_time,
         ptr::null_mut(),
-        &mut function,
+        &raw mut function,
     ) != 0
     {
         return ptr::null_mut();

@@ -57,6 +57,11 @@ The npm dependencies are development tools only. Rust's build script runs on the
 with `std`; the shipped addon itself is entirely `no_std` and links only Win32.
 The custom DLL entry point does not initialize the C runtime.
 
+Clippy follows [Rolldown's lint rules](https://github.com/rolldown/rolldown/blob/main/Cargo.toml),
+including its pedantic, nursery, and restriction lint settings. Run it on the library
+with `cargo clippy --lib --locked -- -D warnings`; Rust's test harness uses `std`
+and conflicts with this addon's custom panic handler.
+
 To cross-compile ARM64 from a Windows x64 machine, install the Rust target and
 the ARM64 MSVC tools before running:
 

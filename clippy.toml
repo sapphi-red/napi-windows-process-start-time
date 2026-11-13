@@ -1,0 +1,3 @@
+# Shared thresholds from https://github.com/rolldown/rolldown/blob/main/clippy.toml.
+too-many-lines-threshold = 200
+avoid-breaking-exported-api = false

@@ -40,7 +40,7 @@
     "lint": "oxlint",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "check": "npm run format:check && npm run lint && cargo fmt --check && cargo clippy --lib -- -D warnings",
+    "check": "npm run format:check && npm run lint && cargo fmt --check && cargo clippy --lib --locked -- -D warnings",
     "prepack": "npm run build"
   },
   "devDependencies": {
