@@ -7,9 +7,7 @@ fn main() {
         ),
         "Only Windows x64 and ARM64 MSVC targets are supported"
     );
-    // There is no CRT initialization: this addon uses only core and Win32.
-    println!("cargo:rustc-link-arg=/ENTRY:DllMain");
-    // DllMain is intentionally both the PE entry point and an exported symbol.
-    println!("cargo:rustc-link-arg=/IGNORE:4216");
+    // No DLL entry point or CRT initialization is needed: this addon uses only core and Win32.
+    println!("cargo:rustc-link-arg=/NOENTRY");
     println!("cargo:rerun-if-changed=build.rs");
 }

@@ -55,7 +55,8 @@ pnpm run format
 
 The pnpm dependencies are development tools only. Rust's build script runs on the host
 with `std`; the shipped addon itself is entirely `no_std` and links only Win32.
-The custom DLL entry point does not initialize the C runtime.
+The addon links with `/NOENTRY` because it needs no DLL entry point or C runtime
+initialization. Node.js initializes the addon through `napi_register_module_v1`.
 
 Clippy follows [Rolldown's lint rules](https://github.com/rolldown/rolldown/blob/main/Cargo.toml),
 including its pedantic, nursery, and restriction lint settings. Run it on the library

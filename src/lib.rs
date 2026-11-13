@@ -45,11 +45,6 @@ fn panic(_: &core::panic::PanicInfo) -> ! {
     }
 }
 
-#[no_mangle]
-pub extern "system" fn DllMain(_: Handle, _: u32, _: *mut c_void) -> i32 {
-    1
-}
-
 // Resolve the small subset of Node-API we actually use. No globals, allocations,
 // import library, or Rust runtime are required, including in Node workers.
 macro_rules! symbol {
