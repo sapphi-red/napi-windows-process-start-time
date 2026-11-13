@@ -13,16 +13,17 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: npm
+          cache: pnpm
       - name: Set up stable Rust
         run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy --no-self-update
       - name: Select stable Rust
         run: rustup default stable
-      - run: npm ci
-      - run: npm run check
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run check
 
   test:
     strategy:
@@ -33,6 +34,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
@@ -40,7 +42,7 @@ jobs:
         run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy --no-self-update
       - name: Select stable Rust
         run: rustup default stable
-      - run: npm test
+      - run: pnpm test
       - uses: actions/upload-artifact@v4
         if: matrix.node == 24
         with:
@@ -53,6 +55,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -61,7 +64,7 @@ jobs:
           pattern: native-*
           merge-multiple: true
           path: native
-      - run: npm pack --ignore-scripts
+      - run: pnpm pack --ignore-scripts
       - uses: actions/upload-artifact@v4
         with:
           name: npm-package

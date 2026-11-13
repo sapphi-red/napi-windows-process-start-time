@@ -13,7 +13,7 @@ try {
   binding = require(filename)
 } catch (cause) {
   throw new Error(
-    `Cannot load ${filename}. When using a source checkout, run npm run build with Rust and the MSVC build tools installed.`,
+    `Cannot load ${filename}. When using a source checkout, run pnpm run build with Rust and the MSVC build tools installed.`,
     { cause },
   )
 }

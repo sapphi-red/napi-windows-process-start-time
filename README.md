@@ -45,15 +45,15 @@ Install stable Rust and Visual Studio C++ Build Tools with the Windows SDK.
 The default build targets the architecture of the Node.js executable:
 
 ```sh
-npm ci
-npm run build
-npm test
-npm run check
-npm run lint
-npm run format
+pnpm install --frozen-lockfile
+pnpm run build
+pnpm test
+pnpm run check
+pnpm run lint
+pnpm run format
 ```
 
-The npm dependencies are development tools only. Rust's build script runs on the host
+The pnpm dependencies are development tools only. Rust's build script runs on the host
 with `std`; the shipped addon itself is entirely `no_std` and links only Win32.
 The custom DLL entry point does not initialize the C runtime.
 
@@ -67,7 +67,7 @@ the ARM64 MSVC tools before running:
 
 ```sh
 rustup target add aarch64-pc-windows-msvc
-npm run build -- --target aarch64-pc-windows-msvc
+pnpm run build --target aarch64-pc-windows-msvc
 ```
 
 ## Size and packaging
@@ -77,11 +77,11 @@ Exact sizes depend on the compiler, target, and implementation. The release
 profile uses `opt-level = "z"`, LTO, one codegen unit, stripped symbols, and
 `panic = "abort"`.
 
-`npm pack` builds the host binary before packing. To prepare a package containing
+`pnpm pack` builds the host binary before packing. To prepare a package containing
 both supported architectures, build both targets into `native/`, then run:
 
 ```sh
-npm pack --ignore-scripts
+pnpm pack --ignore-scripts
 ```
 
 CI builds and tests x64 and ARM64 across Node.js 20, 22, 24, and 26, then produces

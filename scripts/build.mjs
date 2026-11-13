@@ -10,7 +10,7 @@ const targets = {
 }
 const args = process.argv.slice(2)
 if (args.length && (args.length !== 2 || args[0] !== '--target')) {
-  throw new Error('Usage: npm run build [-- --target <Windows MSVC target>]')
+  throw new Error('Usage: pnpm run build [--target <Windows MSVC target>]')
 }
 const target = args[1] ?? Object.keys(targets).find((key) => targets[key] === process.arch)
 if (process.platform !== 'win32' || !Object.hasOwn(targets, target)) {

@@ -35,13 +35,12 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "pretest": "npm run build",
-    "test": "node --test test/*.test.mjs",
+    "test": "pnpm run build && node --test test/*.test.mjs",
     "lint": "oxlint",
     "format": "oxfmt",
     "format:check": "oxfmt --check",
-    "check": "npm run format:check && npm run lint && cargo fmt --check && cargo clippy --lib --locked -- -D warnings",
-    "prepack": "npm run build"
+    "check": "pnpm run format:check && pnpm run lint && cargo fmt --check && cargo clippy --lib --locked -- -D warnings",
+    "prepack": "pnpm run build"
   },
   "devDependencies": {
     "oxfmt": "^0.76.0",
@@ -49,5 +48,6 @@
   },
   "engines": {
     "node": ">=20"
-  }
+  },
+  "packageManager": "pnpm@12.18.0"
 }

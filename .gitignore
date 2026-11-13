@@ -1,5 +1,6 @@
 /target/
 /native/*.node
 /node_modules/
+/.pnpm-store/
 /*.tgz
 /npm-cache/
