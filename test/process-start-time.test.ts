@@ -7,6 +7,7 @@ import { getProcessStartTime } from 'napi-windows-process-start-time'
 
 test('the current process has a stable, precise timestamp', () => {
   const start = getProcessStartTime(process.pid)
+  assert.ok(start !== null)
   assert.match(start, /^win32:\d+$/)
   assert.equal(getProcessStartTime(process.pid), start)
 })
@@ -27,6 +28,7 @@ test('timestamps match PowerShell DateTime ticks', { timeout: 15_000 }, () => {
 })
 
 test('invalid arguments throw TypeError', () => {
+  // @ts-expect-error Exercise runtime validation of a missing PID.
   assert.throws(() => getProcessStartTime(), TypeError)
   for (const input of [
     undefined,
@@ -49,6 +51,7 @@ test('invalid arguments throw TypeError', () => {
     Infinity,
     -Infinity,
   ]) {
+    // @ts-expect-error Exercise runtime validation of invalid PID types and values.
     assert.throws(() => getProcessStartTime(input), TypeError)
   }
 })
@@ -74,7 +77,9 @@ test(
       await exited
     })
     await once(child, 'message')
+    assert.ok(child.pid !== undefined)
     const start = getProcessStartTime(child.pid)
+    assert.ok(start !== null)
     assert.match(start, /^win32:\d+$/)
     assert.equal(getProcessStartTime(child.pid), start)
     child.kill()
@@ -91,7 +96,9 @@ test(
     await Promise.all(
       Array.from({ length: 16 }, async () => {
         const worker = new Worker(new URL('./fixtures/worker.mjs', import.meta.url))
-        onTestFinished(() => worker.terminate())
+        onTestFinished(async () => {
+          await worker.terminate()
+        })
         const exited = once(worker, 'exit')
         const [value] = await once(worker, 'message')
         assert.equal(value, expected)

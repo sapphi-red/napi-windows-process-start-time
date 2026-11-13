@@ -8,7 +8,10 @@
     "noEmit": true,
     "declaration": true,
     "isolatedDeclarations": true,
-    "types": ["node"]
+    "types": ["node"],
+    "paths": {
+      "napi-windows-process-start-time": ["./index.ts"]
+    }
   },
-  "include": ["index.ts", "scripts/**/*.ts", "tsdown.config.ts"]
+  "include": ["index.ts", "scripts/**/*.ts", "test/**/*.ts", "tsdown.config.ts"]
 }
