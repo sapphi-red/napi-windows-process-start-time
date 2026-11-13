@@ -9,6 +9,21 @@ permissions:
   contents: read
 
 jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Set up stable Rust
+        run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy --no-self-update
+      - name: Select stable Rust
+        run: rustup default stable
+      - run: npm ci
+      - run: npm run check
+
   test:
     strategy:
       fail-fast: false
@@ -25,7 +40,6 @@ jobs:
         run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy --no-self-update
       - name: Select stable Rust
         run: rustup default stable
-      - run: npm run check
       - run: npm test
       - uses: actions/upload-artifact@v4
         if: matrix.node == 24
@@ -35,7 +49,7 @@ jobs:
           if-no-files-found: error
 
   package:
-    needs: test
+    needs: [check, test]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

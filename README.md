@@ -49,12 +49,14 @@ Install stable Rust and Visual Studio C++ Build Tools with the Windows SDK.
 The default build targets the architecture of the Node.js executable:
 
 ```sh
+npm ci
 npm run build
 npm test
 npm run check
+npm run format
 ```
 
-There are no npm dependencies to install. Rust's build script runs on the host
+The npm dependencies are development tools only. Rust's build script runs on the host
 with `std`; the shipped addon itself is entirely `no_std` and links only Win32.
 The custom DLL entry point does not initialize the C runtime.
 
