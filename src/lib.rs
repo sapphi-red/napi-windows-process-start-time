@@ -69,6 +69,8 @@ unsafe extern "C" fn get_process_start_time(env: Env, info: Info) -> Value {
 
 #[no_mangle]
 pub extern "C" fn node_api_module_get_api_version_v1() -> i32 {
+    // Node-API v6 introduced napi_create_bigint_uint64, which preserves all 64 timestamp bits.
+    // https://nodejs.org/api/n-api.html#napi_create_bigint_uint64
     6
 }
 
